@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import HttpResponse, render, redirect
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -9,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-
+from .permissions import IshotelOrReadOnly
 
 from app.models import (Profile, Restaurant, Food_iteams, Order, Transport)
 
@@ -18,8 +17,7 @@ from app.serializers import (Register_Serializers,
                              Profile_serializer,
                              Restaurant_serializer,
                              Fooditeam_serializer,
-                             Order_serializer
-                           )
+                             Order_serializer)
 
 class Pagination(PageNumberPagination):
     page_size = 5
@@ -72,7 +70,7 @@ class Foods_from_hotel(viewsets.ModelViewSet):
 
     queryset = Food_iteams.objects.all()
     serializer_class = Fooditeam_serializer
-
+    permission_classes = [IshotelOrReadOnly]
     def perform_create(self, serializer):
         
         restaurant = Restaurant.objects.get(user = self.request.user)
@@ -84,6 +82,12 @@ class Order_from_customer(viewsets.ModelViewSet):
     serializer_class = Order_serializer
 
     def perform_create(self, serializer):
-        product = Food_iteams.objects.get(id=int(self.request.data['meals']))
+        product = self.request.data['meals']
+        print('***********************************', product)
+        pr = []
+        for i in product:
+            print(i)
+            pr.append(i)
+            print(pr)
         user = Profile.objects.get(user = self.request.user)
-        serializer.save(buyer = user, total_price = product.price * int(self.request.data['quantity']))
+        serializer.save(buyer = user, total_price = 1000 )

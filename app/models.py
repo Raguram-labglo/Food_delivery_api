@@ -32,7 +32,7 @@ class Food_iteams(models.Model):
     available = models.BooleanField()
 
     def __str__(self):
-        return self.food
+        return '{}, {}'.format(self.hotel, self.food)
 
 class Order(models.Model):
     cooking = 0
@@ -40,10 +40,10 @@ class Order(models.Model):
     delivery = 2
 
     order = [(1, 'cooking'), 
-        (2, 'on_the_way'),
-        (0, 'delivery')]
+            (2, 'on_the_way'),
+            (0, 'delivery')]
     buyer = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    meals = models.ForeignKey(Food_iteams, on_delete=models.CASCADE)
+    meals = models.ManyToManyField(Food_iteams)
     quantity = models.IntegerField()
     total_price = models.IntegerField()
     order_status = models.IntegerField(choices=order, default=1)

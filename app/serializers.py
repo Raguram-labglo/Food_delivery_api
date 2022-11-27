@@ -46,12 +46,12 @@ class Fooditeam_serializer(serializers.ModelSerializer):
     hotel = Restaurant_serializer(read_only = True)
     class Meta:
         model = Food_iteams
-        fields = ['hotel' ,'food' ,'image' ,'price' ,'available']
+        fields = ['id', 'hotel', 'food', 'image', 'price', 'available']
         read_only_fields = ('hotel',)
 
 class Order_serializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = ['buyer' ,'meals' ,'quantity' ,'total_price' ,'order_status']
-        read_only_fields = ('total_price',)
+        fields = ['buyer', 'meals', 'quantity', 'total_price', 'order_status']
+        read_only_fields = ('total_price', 'buyer', 'order_status')
