@@ -3,16 +3,14 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    user_name = models.CharField(blank=False, max_length=50)
     profile_image = models.ImageField(upload_to='user_profile', blank=False)
     contact_no = models.PositiveIntegerField()
-    email = models.EmailField(blank=True)
     address= models.TextField()
     alternate_address = models.TextField(null = True)
     
 
     def __str__(self):
-        return self.user_name
+        return '{}'.format(self.user)
 
 class Restaurant(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='restaurant')
@@ -38,24 +36,21 @@ class Order(models.Model):
     cooking = 0
     on_the_way = 1
     delivery = 2
+    cancel = 3
+    delivered = 4
 
-    order = [(1, 'cooking'), 
+    order = [(0, 'waiting'),
+            (1, 'cooking'), 
             (2, 'on_the_way'),
-            (0, 'delivery')]
+            (3, 'cancel'),
+            (4, 'delivered')
+            ]
     buyer = models.ForeignKey(Profile, on_delete=models.CASCADE)
     meals = models.ManyToManyField(Food_iteams)
-    quantity = models.IntegerField()
+    # quantity = models.IntegerField()
     total_price = models.IntegerField()
-    order_status = models.IntegerField(choices=order, default=1)
+    order_status = models.IntegerField(choices=order, default=0)
 
     def __str__(self):
-        return self.buyer
+        return '{}' .format(self.buyer)
 
-class Transport(models.Model):
-
-    delivery_person = models.ForeignKey(User, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    start_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.delivery_person 

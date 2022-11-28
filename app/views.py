@@ -8,16 +8,18 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .permissions import IshotelOrReadOnly
+from .permissions import IshotelOrReadOnly, User_can_see_order
+from rest_framework.permissions import IsAuthenticated
 
-from app.models import (Profile, Restaurant, Food_iteams, Order, Transport)
+from app.models import (Profile, Restaurant, Food_iteams, Order)
 
 from app.serializers import (Register_Serializers,
                              Login_serializer,
                              Profile_serializer,
                              Restaurant_serializer,
                              Fooditeam_serializer,
-                             Order_serializer)
+                             Order_serializer,
+                             Hotel_register)
 
 class Pagination(PageNumberPagination):
     page_size = 5
@@ -45,32 +47,36 @@ class LoginView(APIView):
         return Response({'token': token.key})
 
 
-class Register(viewsets.ModelViewSet):
+class UserRegister(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = Register_Serializers
+    http_method_names = ['post']
 
-class CreateProfileView(viewsets.ModelViewSet):
-
-    queryset = Profile.objects.all()
-    serializer_class = Profile_serializer
-
-    def perform_create(self, serializer):
-        serializer.save(user = self.request.user)
 
 class Register_hotel(viewsets.ModelViewSet):
 
-    queryset = Restaurant.objects.all()
-    serializer_class = Restaurant_serializer
+    queryset = User.objects.all()
+    serializer_class = Hotel_register
+    http_method_names = ['post']
 
-    def perform_create(self, serializer):
-        serializer.save(user = self.request.user)
+
+    # def get_queryset(self):
+    #     return Restaurant.objects.filter(user = self.request.user)
+
+    # def perform_create(self, serializer):
+    #     serializer.save(user = self.request.user)
 
 class Foods_from_hotel(viewsets.ModelViewSet):
 
     queryset = Food_iteams.objects.all()
     serializer_class = Fooditeam_serializer
-    permission_classes = [IshotelOrReadOnly]
+    permission_classes = [IshotelOrReadOnly, IsAuthenticated]
+
+    def get_queryset(self):
+        user = Restaurant.objects.get(user = self.request.user)
+        return Food_iteams.objects.filter(hotel = user)
+
     def perform_create(self, serializer):
         
         restaurant = Restaurant.objects.get(user = self.request.user)
@@ -80,14 +86,20 @@ class Order_from_customer(viewsets.ModelViewSet):
 
     queryset = Order.objects.all()
     serializer_class = Order_serializer
+    permission_classes = [User_can_see_order, IsAuthenticated]
+
+    def get_queryset(self):
+        user = Profile.objects.get(user = self.request.user)
+        return Order.objects.filter(buyer = user)
 
     def perform_create(self, serializer):
-        product = self.request.data['meals']
-        print('***********************************', product)
+        print(self.request.data)
+        product = dict(self.request.data)
+        pro = product['meals']
         pr = []
-        for i in product:
-            print(i)
-            pr.append(i)
-            print(pr)
+        for ids in pro:
+            foods = Food_iteams.objects.get(id = ids)
+            pr.append(foods.price)
+        total = sum(pr)
         user = Profile.objects.get(user = self.request.user)
-        serializer.save(buyer = user, total_price = 1000 )
+        serializer.save(buyer = user, total_price = total )
