@@ -15,3 +15,9 @@ class User_can_see_order(permissions.BasePermission):
 
         return obj.buyer.user == request.user
 
+class Hotel_waiting_orders(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return obj.meals.hotel.user == request.user

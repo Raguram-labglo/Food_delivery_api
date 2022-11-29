@@ -80,5 +80,23 @@ class Order_serializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
+        fields = ['id','buyer', 'meals', 'restaurant', 'total_price', 'order_status']
+        read_only_fields = ('total_price', 'buyer', 'order_status', 'restaurant')
+
+    def validate(self, attrs):
+        food = attrs['meals']
+        hotel = food[0].hotel.id
+        for check in food:
+            if check.hotel.id != hotel:
+                raise serializers.ValidationError('Your orders must in one hotels only')
+        return attrs
+
+class Orders_condition(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
         fields = ['id','buyer', 'meals', 'total_price', 'order_status']
-        read_only_fields = ('total_price', 'buyer', 'order_status')
+        read_only_fields = ['id','buyer', 'meals','restaurant', 'total_price']
+
+
+        

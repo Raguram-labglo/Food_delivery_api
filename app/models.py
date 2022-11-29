@@ -47,7 +47,8 @@ class Order(models.Model):
             ]
     buyer = models.ForeignKey(Profile, on_delete=models.CASCADE)
     meals = models.ManyToManyField(Food_iteams)
-    # quantity = models.IntegerField()
+    #quantity = models.IntegerField(null=True)
+    restaurant = models.ForeignKey(Restaurant, null = True , on_delete=models.CASCADE)
     total_price = models.IntegerField()
     order_status = models.IntegerField(choices=order, default=0)
 
